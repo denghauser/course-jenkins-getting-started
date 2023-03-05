@@ -1,28 +1,22 @@
 pipeline {
-
     agent any
-
-    triggers{
-        pollSCM('* * * * *') 
-    }
-
+    triggers { pollSCM('* * * * *') }
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'DIETMAR_GITHUB', url: 'https://github.com/denghauser/jgsu-spring-petclinic.git'
-            }
+                git url: 'https://github.com/g0t4/jgsu-spring-petclinic.git', branch: 'main'
+            }            
         }
         stage('Build') {
             steps {
                 sh './mvnw clean package'
+                //sh 'false' // true
             }
-
+        
             post {
-                success {
-                    archiveArtifacts 'target/*.jar'
-                }
                 always {
                     junit '**/target/surefire-reports/TEST-*.xml'
+                    archiveArtifacts 'target/*.jar'
                 }
                 changed {
                     emailext subject: "Job \'${JOB_NAME}\' (build ${BUILD_NUMBER}) ${currentBuild.result}",
